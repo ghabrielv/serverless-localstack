@@ -1,0 +1,39 @@
+service: lambda-sqs
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: python3.11
+  environment:
+    QUEUE_URL: { Ref: MyQueue }
+
+functions:
+  enqueue:
+    handler: handler.enqueue
+    events:
+      - http:
+          path: /enqueue
+          method: post
+
+resources:
+  Resources:
+    MyQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: MyQueue
+  Outputs:
+    MyQueueArn:
+      Value:
+        Fn::GetAtt: [ MyQueue, Arn]
+      Export:
+        Name: MyQueueArn
+
+custom:
+  localstack:
+    stages:
+      - local
+
+plugins:
+  - serverless-localstack
+  - serverless-python-requirements
